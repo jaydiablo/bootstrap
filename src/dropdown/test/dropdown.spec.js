@@ -220,6 +220,10 @@ describe('dropdownToggle', function() {
       element = dropdown();
     });
 
+    afterEach(function() {
+      $document.find('body').removeClass('dropdown');
+    });
+
     it('adds the menu to the body', function() {
       expect($document.find('#dropdown-menu').parent()[0]).toBe($document.find('body')[0]);
     });
@@ -246,6 +250,53 @@ describe('dropdownToggle', function() {
       element.find('[dropdown-toggle]').click();
 
       expect(body.hasClass('open')).toBe(false);
+    });
+  });
+
+  describe('using dropdown-append-to', function() {
+    var initialPage;
+
+    function dropdown() {
+      return $compile('<li dropdown dropdown-append-to="appendTo"><a href dropdown-toggle></a><ul class="dropdown-menu" id="dropdown-menu"><li><a href>Hello On Container</a></li></ul></li>')($rootScope);
+    }
+
+    beforeEach(function() {
+      $document.find('body').append(angular.element('<div id="dropdown-container"></div>'));
+
+      $rootScope.appendTo = $document.find('#dropdown-container');
+      $rootScope.$digest();
+
+      element = dropdown();
+      $document.find('body').append(element);
+    });
+
+    afterEach(function() {
+      // Cleanup the extra elements we appended
+      $document.find('#dropdown-container').remove();
+    });
+
+    it('appends to container', function() {
+      expect($document.find('#dropdown-menu').parent()[0].id).toBe('dropdown-container');
+    });
+
+    it('adds dropdown class to container', function() {
+      expect($document.find('#dropdown-container').hasClass('dropdown')).toBe(true);
+    });
+
+    it('toggles open class on container', function() {
+      var container = $document.find('#dropdown-container');
+
+      expect(container.hasClass('open')).toBe(false);
+      element.find('[dropdown-toggle]').click();
+      expect(container.hasClass('open')).toBe(true);
+      element.find('[dropdown-toggle]').click();
+      expect(container.hasClass('open')).toBe(false);
+    });
+
+    it('removes the menu when the dropdown is removed', function() {
+      element.remove();
+      $rootScope.$digest();
+      expect($document.find('#dropdown-menu').length).toEqual(0);
     });
   });
 
